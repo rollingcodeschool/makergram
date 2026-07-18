@@ -3,6 +3,8 @@ import Home from "./pages/Home";
 import Post from "./pages/Post";
 import Rank from "./pages/Rank";
 import BottomNav from "./components/BottomNav";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 
 export default function App() {
@@ -14,6 +16,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/post" element={<Post />} />
             <Route path="/rank" element={<Rank />} />
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/register" element={<Register />} />
           </Routes>
         </main>
 
