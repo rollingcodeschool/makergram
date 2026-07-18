@@ -35,7 +35,7 @@ export default function Post() {
     // 1️⃣ Preparar nombre del archivo
     const fileExt = file.name.split(".").pop();
     const fileName = `${file.name}-${Date.now()}.${fileExt}`;
-    const filePath = `posts/${fileName}`;
+    const filePath = `post/${fileName}`;
 
     // 2️⃣ Subir al bucket "images"
     const { data: uploadData, error: uploadError } = await supabase.storage
