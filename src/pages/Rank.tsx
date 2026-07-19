@@ -8,17 +8,18 @@ import { supabase } from "../lib/client";
 const DEFAULT_AVATAR =
   "https://images.pexels.com/photos/7163703/pexels-photo-7163703.jpeg";
 
-interface Post_rank{
-   id: number | string;
-    user_id: string;
-    image_url: string;
-    caption: string;
-    likes: number;
-    created_at: Date;  
-    profile?: {
-      username: string;
-      avatar_url: string | null;
-    };  
+interface Post_rank {
+  id: number | string;
+  user_id: string;
+  image_url: string;
+  caption: string;
+  likes: number;
+  isLiked?: boolean;
+  created_at: Date;
+  profile?: {
+    username: string;
+    avatar_url: string | null;
+  };
 }
 
 function Modal({ post, onClose }: { post: Post_rank; onClose: () => void }) {
@@ -112,7 +113,8 @@ export default function Rank() {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const { data, error } = await supabase
+      //  1. Obtener posts
+      const { data: postsData, error } = await supabase
         .from("posts_new")
         .select("id, image_url, caption, likes, user_id, created_at")
         .gt("likes", 5)
@@ -120,10 +122,32 @@ export default function Rank() {
 
       if (error) {
         console.error("Error al obtener los posts:", error);
-      } else {
-        console.log("Posts obtenidos:", data);
-        setPosts(data);
+        return;
       }
+      // 2. Obtener IDs únicos de usuarios
+      const userIds = [...new Set(postsData.map((p) => p.user_id))];
+
+      // 3. Buscar profiles de esos usuarios
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url")
+        .in("id", userIds);
+
+      // 4. Crear mapa de profiles por ID
+      const profilesMap = new Map(
+        profilesData?.map((p) => [
+          p.id,
+          { username: p.username, avatar_url: p.avatar_url },
+        ]) || [],
+      );
+
+      // 5. Combinar posts con profiles
+      const postsWithProfiles = postsData.map((post) => ({
+        ...post,
+        profile: profilesMap.get(post.user_id),
+      }));
+
+      setPosts(postsWithProfiles);
     };
     fetchPosts();
   }, []);

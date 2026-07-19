@@ -1,14 +1,34 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "../lib/client";
 import { AppHeader } from "../components/AppHeader";
+import { Link } from "react-router";
 
 export default function Post() {
+  const [userId, setUserId] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  //? obtenemos la sesion del usuario 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        setUserId(user.id);
+      }
+      setIsCheckingAuth(false);
+    };
+
+    checkAuth();
+  }, []);
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -31,7 +51,10 @@ export default function Post() {
   };
 
   const uploadAndCreatePost = async (file: File) => {
-    const userId = "11111111-1111-1111-1111-111111111111";
+    // const userId = "11111111-1111-1111-1111-111111111111";
+    if (!userId) {
+      throw new Error("No hay usuario autenticado");
+    }
     // 1️⃣ Preparar nombre del archivo
     const fileExt = file.name.split(".").pop();
     const fileName = `${file.name}-${Date.now()}.${fileExt}`;
@@ -115,6 +138,30 @@ export default function Post() {
     }
   };
 
+//?Mostramos este mensaje mientras carga el usuario
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground/60">Cargando...</div>
+      </div>
+    );
+  }
+
+  //? Si no tenemos un usuario, le indicamos que inicie sesion
+  if (!userId) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-foreground/60 mb-4">
+            Debes iniciar sesión para crear posts
+          </p>
+          <Link to="/auth/login" className="text-primary hover:underline">
+            Iniciar sesión
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

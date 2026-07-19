@@ -9,17 +9,39 @@ export default function Home() {
 
    useEffect(() => {
     const fetchPosts = async () => {
-      const { data, error } = await supabase
+      const { data: postsData, error } = await supabase
         .from("posts_new")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error al obtener los posts:", error);
-      } else {
-        console.log("Posts obtenidos:", data);
-        setPosts(data);
-      }
+        return;
+      } 
+      // 2. Obtener IDs únicos de usuarios
+      const userIds = [...new Set(postsData.map((p) => p.user_id))];
+
+      // 3. Buscar profiles de esos usuarios
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url")
+        .in("id", userIds);
+
+      // 4. Crear mapa de profiles por ID
+      const profilesMap = new Map(
+        profilesData?.map((p) => [
+          p.id,
+          { username: p.username, avatar_url: p.avatar_url },
+        ]) || [],
+      );
+
+      // 5. Combinar posts con profiles
+      const postsWithProfiles = postsData.map((post) => ({
+        ...post,
+        profile: profilesMap.get(post.user_id),
+      }));
+
+      setPosts(postsWithProfiles);
     };
     fetchPosts();
   }, []);
