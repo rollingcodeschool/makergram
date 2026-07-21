@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import ProfileEdit from "./pages/ProfileEdit";
+import Dashboard from "./pages/Dashboard";
 
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/profile/edit" element={<ProfileEdit />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </main>
 
