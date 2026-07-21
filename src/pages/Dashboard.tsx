@@ -293,6 +293,12 @@ export default function Dashboard() {
       <AppHeader
         title="Dashboard"
         containerClassName="max-w-6xl mx-auto"
+        leftContent={
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span className="text-sm text-foreground/60">En vivo</span>
+          </div>
+        }
       />
 
       <main className="max-w-6xl mx-auto px-4 py-8">
