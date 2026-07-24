@@ -58,12 +58,26 @@ export default function Home() {
           ),
         );
       }
+      //🆕 Crear notificación via Edge Function
+      if (post.user_id !== currentUserId) {
+        supabase.functions.invoke("send-notification", {
+          body: {
+            type: "like",
+            post_id: postId,
+            actor_id: currentUserId,
+            post_owner_id: post.user_id,
+          },
+        });
+      }
     }
   };
 
   //🆕 Agregar comentario
   const handleComment = async (postId: number | string, body: string) => {
     if (!currentUserId) return;
+
+    const post = posts.find((p) => p.id === postId);
+    if (!post) return;
 
     const { data, error } = await supabase
       .from("comments")
@@ -91,6 +105,19 @@ export default function Home() {
             : p,
         ),
       );
+      //🆕 Notificar al titular del post (si no es el mismo usuario)
+      if (post.user_id !== currentUserId) {
+        // Crear notificación via Edge Function
+        supabase.functions.invoke("send-notification", {
+          body: {
+            type: "comment",
+            post_id: postId,
+            actor_id: currentUserId,
+            post_owner_id: post.user_id,
+            comment_body: body,
+          },
+        });
+      }
     }
   };
 
