@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { supabase } from "../lib/client";
+import { NotificationBell } from "./NotificationBell";
 
 type HeaderUser = {
   id: string;
@@ -181,6 +182,7 @@ export function AppHeader({
             <div className="w-8 h-8" />
           ) : currentUser ? (
             <>
+            <NotificationBell />
               <Link
                 to="/profile"
                 title="Mi Perfil"
